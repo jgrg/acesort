@@ -2,5 +2,25 @@
 name = "acesort"
 version = "0.1.0"
 edition = "2024"
+publish = false
+
+[profile.release]
+panic = "abort"
+
+[profile.dev]
+panic = "abort"
+
+[lints.rust]
+unsafe_code = "forbid"
+unstable_features = "forbid"
+dead_code = "allow"
+
+[lints.clippy]
+suspicious = "deny"
+complexity = "warn"
+perf = "warn"
+style = "warn"
+pedantic = "warn"
 
 [dependencies]
+anyhow = "1.0.101"

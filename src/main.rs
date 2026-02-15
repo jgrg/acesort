@@ -1,3 +1,5 @@
+mod ace_sort;
+
 use anyhow::{self, Context};
 use std::env;
 use std::fs::File;
@@ -5,10 +7,12 @@ use std::io::{self, BufRead, Write};
 use std::path::Path;
 
 fn main() -> anyhow::Result<()> {
+    // Get a list of input files (if any) from the command line
     let mut args_itr = env::args();
     let _cmd = args_itr.next();
     let files: Vec<String> = args_itr.collect();
 
+    // Read the lines of all the files or STDIN into a single Vec
     let mut all_lines: Vec<String> = vec![];
     if files.is_empty() {
         read_stdin_into_vec(&mut all_lines).context("Error reading STDIN")?;
@@ -19,7 +23,8 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    all_lines.sort();
+    // Sort lines and print them all to STDOUT
+    all_lines.sort_by(|a, b| ace_sort::ace_cmp(a, b));
     write_vec_to_stdout(&all_lines).context("Error writing to STDOUT")?;
 
     Ok(())

@@ -1,16 +1,15 @@
 use std::cmp::Ordering;
 
 pub fn ace_cmp(mut a: &str, mut b: &str) -> Ordering {
-    let str_cmp = a.cmp(b);
-    if str_cmp == Ordering::Equal {
-        return str_cmp;
+    if a == b {
+        return Ordering::Equal;
     }
 
     // Fast check if either are empty string
     match (a.is_empty(), b.is_empty()) {
         (true, false) => return Ordering::Less,
         (false, true) => return Ordering::Greater,
-        (true, true) => unreachable!(),
+        (true, true) => unreachable!(), // Because `a == b` test above would have returned
         (false, false) => {}
     }
 
@@ -53,7 +52,8 @@ pub fn ace_cmp(mut a: &str, mut b: &str) -> Ordering {
         let a_str = &a[a_first_non_zero..a_digit_end];
         let b_str = &b[b_first_non_zero..b_digit_end];
 
-        // Longer strings of digits are bigger numbers
+        // Longer strings of digits, after any leading zeroes have been
+        // removed, are bigger numbers
         match a_str.len().cmp(&b_str.len()) {
             Ordering::Equal => {}
             ord => return ord,
@@ -67,9 +67,7 @@ pub fn ace_cmp(mut a: &str, mut b: &str) -> Ordering {
         }
 
         // Use length of any strings of zeroes to break ties
-        let a_str = &a[..a_first_non_zero];
-        let b_str = &b[..b_first_non_zero];
-        match a_str.len().cmp(&b_str.len()) {
+        match a_first_non_zero.cmp(&b_first_non_zero) {
             Ordering::Equal => {}
             ord => return ord,
         }
@@ -85,7 +83,7 @@ pub fn ace_cmp(mut a: &str, mut b: &str) -> Ordering {
 #[cfg(test)]
 mod tests {
     use super::*;
-    // use std::cmp::Ordering;
+
     #[test]
     fn test_ace_cmp() {
         for (a, b, ord) in [
@@ -98,9 +96,13 @@ mod tests {
             ("x10", "x2", Ordering::Greater),
             ("2", "x2", Ordering::Less),
             ("x00", "x02", Ordering::Less),
-            ("x002", "x02", Ordering::Greater),
+            ("x002", "x02", Ordering::Greater), // Longer string of zeroes is bigger
             ("x02", "x002", Ordering::Less),
             ("x02a", "x02b", Ordering::Less),
+            ("x02a", "x02b", Ordering::Less),
+            ("3.14", "3.015", Ordering::Less), // `ace_cmp()` will not generate correct float ordering
+            ("001", "02", Ordering::Less),
+            ("1002", "102", Ordering::Greater),
         ] {
             eprintln!("\nComparing '{a}' <=> '{b}' expecting {ord:?}");
             assert_eq!(ace_cmp(a, b), ord);

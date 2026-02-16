@@ -1,16 +1,17 @@
 use std::cmp::Ordering;
 
+// Adapted from `version_cmp()` in:
+//   https://github.com/uutils/coreutils/blob/main/src/uucore/src/lib/features/version_cmp.rs
 pub fn ace_cmp(mut a: &str, mut b: &str) -> Ordering {
     if a == b {
         return Ordering::Equal;
     }
 
-    // Fast check if either are empty string
+    // Fast check for one of the two being an empty string
     match (a.is_empty(), b.is_empty()) {
         (true, false) => return Ordering::Less,
         (false, true) => return Ordering::Greater,
-        (true, true) => unreachable!(), // Because `a == b` test above would have returned
-        (false, false) => {}
+        _ => {}
     }
 
     while !a.is_empty() || !b.is_empty() {
@@ -48,7 +49,7 @@ pub fn ace_cmp(mut a: &str, mut b: &str) -> Ordering {
         let a_first_non_zero = a.chars().position(|c| c != '0').unwrap_or(a.len());
         let b_first_non_zero = b.chars().position(|c| c != '0').unwrap_or(b.len());
 
-        // Get the string of digits to compare
+        // Get two strings of digits to compare
         let a_str = &a[a_first_non_zero..a_digit_end];
         let b_str = &b[b_first_non_zero..b_digit_end];
 
@@ -77,6 +78,7 @@ pub fn ace_cmp(mut a: &str, mut b: &str) -> Ordering {
         b = &b[b_digit_end..];
     }
 
+    // Should be impossible to reach
     Ordering::Equal
 }
 
@@ -102,7 +104,7 @@ mod tests {
             ("x02a", "x02b", Ordering::Less),
             ("3.14", "3.015", Ordering::Less), // `ace_cmp()` will not generate correct float ordering
             ("001", "02", Ordering::Less),
-            ("1002", "102", Ordering::Greater),
+            ("1002", "201", Ordering::Greater),
         ] {
             eprintln!("\nComparing '{a}' <=> '{b}' expecting {ord:?}");
             assert_eq!(ace_cmp(a, b), ord);

@@ -6,6 +6,8 @@ publish = false
 
 [profile.release]
 panic = "abort"
+lto = "fat"
+# codegen-units = 1
 
 [profile.dev]
 panic = "abort"
@@ -24,3 +26,4 @@ pedantic = "warn"
 
 [dependencies]
 anyhow = "1.0.101"
+clap = { version = "4.5.58", features = ["derive"] }

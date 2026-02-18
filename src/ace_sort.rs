@@ -98,13 +98,28 @@ mod tests {
             ("x10", "x2", Ordering::Greater),
             ("2", "x2", Ordering::Less),
             ("x00", "x02", Ordering::Less),
-            ("x002", "x02", Ordering::Greater), // Longer string of zeroes is bigger
-            ("x02", "x002", Ordering::Less),
             ("x02a", "x02b", Ordering::Less),
-            ("x02a", "x02b", Ordering::Less),
-            ("3.14", "3.015", Ordering::Less), // `ace_cmp()` will not generate correct float ordering
             ("001", "02", Ordering::Less),
             ("1002", "201", Ordering::Greater),
+            (
+                // Longer string of zeroes is bigger
+                "x002",
+                "x02",
+                Ordering::Greater,
+            ),
+            ("x02", "x002", Ordering::Less),
+            (
+                // `ace_cmp()` will not generate correct ordering of decimals
+                "3.14",
+                "3.015",
+                Ordering::Less,
+            ),
+            (
+                // Arbitrarily long numbers can be sorted
+                "999999999999999999999999999999999999999999999999999999999999999999999997",
+                "999999999999999999999999999999999999999999999999999999999999999999999998",
+                Ordering::Less,
+            ),
         ] {
             eprintln!("\nComparing '{a}' <=> '{b}' expecting {ord:?}");
             assert_eq!(ace_cmp(a, b), ord);

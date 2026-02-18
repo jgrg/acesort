@@ -78,7 +78,7 @@ where
     Ok(())
 }
 
-fn write_vec_to_stdout(lines_vec: &Vec<String>) -> io::Result<()> {
+fn write_vec_to_stdout(lines_vec: &[String]) -> io::Result<()> {
     let mut out = io::BufWriter::new(io::stdout());
     for line in lines_vec {
         writeln!(out, "{line}")?;

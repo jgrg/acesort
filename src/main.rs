@@ -44,18 +44,24 @@ fn main() -> anyhow::Result<()> {
 
     // Read the lines of all the files or STDIN into a single Vec
     let mut all_lines: Vec<String> = vec![];
-    if cli.file.is_empty() {
-        read_stdin_into_vec(&mut all_lines).context("Error reading STDIN")?;
-    } else {
-        for file_path in cli.file {
-            read_file_lines_into_vec(&mut all_lines, &file_path)
-                .context(format!("Error reading file '{file_path}'"))?;
-        }
-    }
+    read_all_input(&mut all_lines, &cli.file)?;
 
     // Sort lines and print them all to STDOUT
     all_lines.sort_unstable_by(|a, b| ace_sort::ace_cmp(a, b));
     write_vec_to_stdout(&all_lines).context("Error writing to STDOUT")?;
+
+    Ok(())
+}
+
+fn read_all_input(all_lines: &mut Vec<String>, file_list: &[String]) -> anyhow::Result<()> {
+    if file_list.is_empty() {
+        read_stdin_into_vec(all_lines).context("Error reading STDIN")?;
+    } else {
+        for file_path in file_list {
+            read_file_lines_into_vec(all_lines, file_path)
+                .context(format!("Error reading file '{file_path}'"))?;
+        }
+    }
 
     Ok(())
 }

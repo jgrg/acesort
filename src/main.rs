@@ -2,6 +2,7 @@ mod ace_sort;
 
 use anyhow::{self, Context};
 use clap::Parser;
+use rand::prelude::*;
 use std::fs::File;
 use std::io::{self, BufRead, Write};
 use std::path::Path;
@@ -44,7 +45,25 @@ fn main() -> anyhow::Result<()> {
 
     // Read the lines of all the files or STDIN into a single Vec
     let mut all_lines: Vec<String> = vec![];
-    read_all_input(|x| all_lines.push(x), &cli.file)?;
+    if cli.sample > 0 {
+        let smpl = cli.sample;
+        let mut rng = rand::rng();
+        let mut count = 0;
+        let sampler = |x| {
+            if count < smpl {
+                all_lines.push(x);
+            } else {
+                let n = rng.random_range(0..count);
+                if n < smpl {
+                    all_lines[n] = x;
+                }
+            }
+            count += 1;
+        };
+        read_all_input(sampler, &cli.file)?;
+    } else {
+        read_all_input(|x| all_lines.push(x), &cli.file)?;
+    }
 
     // Sort lines and print them all to STDOUT
     all_lines.sort_unstable_by(|a, b| ace_sort::ace_cmp(a, b));

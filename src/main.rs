@@ -44,42 +44,41 @@ fn main() -> anyhow::Result<()> {
 
     // Read the lines of all the files or STDIN into a single Vec
     let mut all_lines: Vec<String> = vec![];
-    read_all_input(&mut all_lines, &cli.file)?;
+    read_all_input(|x| all_lines.push(x), &cli.file)?;
 
     // Sort lines and print them all to STDOUT
     all_lines.sort_unstable_by(|a, b| ace_sort::ace_cmp(a, b));
-    write_vec_to_stdout(&all_lines).context("Error writing to STDOUT")?;
+    write_vec_to_stdout(&all_lines).context("Writing to STDOUT")?;
 
     Ok(())
 }
 
-fn read_all_input(all_lines: &mut Vec<String>, file_list: &[String]) -> anyhow::Result<()> {
+fn read_all_input(mut store: impl FnMut(String), file_list: &[String]) -> anyhow::Result<()> {
     if file_list.is_empty() {
-        read_stdin_into_vec(all_lines).context("Error reading STDIN")?;
+        read_stdin_into_vec(&mut store).context("Reading STDIN")?;
     } else {
         for file_path in file_list {
-            read_file_lines_into_vec(all_lines, file_path)
-                .context(format!("Error reading file '{file_path}'"))?;
+            read_file_lines_into_vec(&mut store, file_path)
+                .context(format!("Reading file '{file_path}'"))?;
         }
     }
-
     Ok(())
 }
 
-fn read_stdin_into_vec(lines_vec: &mut Vec<String>) -> io::Result<()> {
+fn read_stdin_into_vec(mut store: impl FnMut(String)) -> io::Result<()> {
     for line in io::stdin().lines() {
-        lines_vec.push(line?);
+        store(line?);
     }
     Ok(())
 }
 
-fn read_file_lines_into_vec<P>(lines_vec: &mut Vec<String>, file_path: P) -> io::Result<()>
+fn read_file_lines_into_vec<P>(mut store: impl FnMut(String), file_path: P) -> io::Result<()>
 where
     P: AsRef<Path>,
 {
     let fh = File::open(file_path)?;
     for line in io::BufReader::new(fh).lines() {
-        lines_vec.push(line?);
+        store(line?);
     }
     Ok(())
 }

@@ -26,5 +26,5 @@ pedantic = "warn"
 
 [dependencies]
 anyhow = "1.0.101"
-clap = { version = "4.5.58", features = ["derive"] }
+clap = { version = "4.5.58", features = ["derive", "wrap_help"] }
 rand = "0.10.0"

@@ -15,7 +15,7 @@ use std::path::Path;
 /// default method of sorting where, for example, "chr2" sorts
 /// before "chr10".
 #[derive(Parser)]
-#[command(version)]
+#[command(version, max_term_width=80)]
 struct Cli {
     /// List of one or more files to sort, or STDIN if empty.
     file: Vec<String>,

@@ -1,9 +1,9 @@
 mod ace_sort;
 mod store;
 
+use crate::store::LineStore;
 use anyhow::{self, Context};
 use clap::Parser;
-use crate::store::LineStore;
 use std::fs::File;
 use std::io::{self, BufRead, Write};
 use std::path::Path;
@@ -15,7 +15,7 @@ use std::path::Path;
 /// default method of sorting where, for example, "chr2" sorts
 /// before "chr10".
 #[derive(Parser)]
-#[command(version, max_term_width=80)]
+#[command(version, max_term_width = 80)]
 struct Cli {
     /// List of one or more files to sort, or STDIN if empty.
     file: Vec<String>,
@@ -59,7 +59,11 @@ fn main() -> anyhow::Result<()> {
 
     // Sort lines and print them all to STDOUT
     all_lines.sort_unstable_by(|a, b| ace_sort::ace_cmp(a, b));
-    write_vec_to_stdout(&all_lines).context("Witing to STDOUT")?;
+    if cli.unique {
+        write_vec_unique_to_stdout(&all_lines).context("Witing to STDOUT")?;
+    } else {
+        write_vec_to_stdout(&all_lines).context("Witing to STDOUT")?;
+    }
 
     Ok(())
 }

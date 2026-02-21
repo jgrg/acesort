@@ -45,12 +45,13 @@ struct Cli {
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
-    // Read the lines of all the files or STDIN into a single Vec
     let mut all_lines: Vec<String> = if cli.sample > 0 {
+        // Read a random sample of lines from the files or STDIN
         let mut store = store::Reservoir::new(cli.sample);
         read_all_input(&mut store, &cli.file)?;
         store.get_all_lines()
     } else {
+        // Read the lines of all the files or STDIN
         let mut store = store::Simple::new();
         read_all_input(&mut store, &cli.file)?;
         store.get_all_lines()

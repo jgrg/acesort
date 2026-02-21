@@ -1,16 +1,19 @@
 mod ace_sort;
+mod store;
 
 use anyhow::{self, Context};
 use clap::Parser;
+use crate::store::LineStore;
 use std::fs::File;
 use std::io::{self, BufRead, Write};
 use std::path::Path;
 
 /// Sort input lines, sorting digit sub-strings numerically
 ///
-/// This is also known as "natural" sorting. Version sorting ("-V" in the UNIX
-/// sort command) is similar. `acesort` is named after ACeDB's default method
-/// of sorting where, for example, "chr2" sorts before "chr10".
+/// This is also known as "natural" sorting. Version sorting (the `-V` option
+/// in the UNIX sort command) is similar. `acesort` is named after ACeDB's
+/// default method of sorting where, for example, "chr2" sorts
+/// before "chr10".
 #[derive(Parser)]
 #[command(version)]
 struct Cli {
@@ -43,43 +46,49 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     // Read the lines of all the files or STDIN into a single Vec
-    let mut all_lines: Vec<String> = vec![];
-    read_all_input(&mut all_lines, &cli.file)?;
+    let mut all_lines: Vec<String> = if cli.sample > 0 {
+        let mut store = store::Reservoir::new(cli.sample);
+        read_all_input(&mut store, &cli.file)?;
+        store.get_all_lines()
+    } else {
+        let mut store = store::Simple::new();
+        read_all_input(&mut store, &cli.file)?;
+        store.get_all_lines()
+    };
 
     // Sort lines and print them all to STDOUT
     all_lines.sort_unstable_by(|a, b| ace_sort::ace_cmp(a, b));
-    write_vec_to_stdout(&all_lines).context("Error writing to STDOUT")?;
+    write_vec_to_stdout(&all_lines).context("Witing to STDOUT")?;
 
     Ok(())
 }
 
-fn read_all_input(all_lines: &mut Vec<String>, file_list: &[String]) -> anyhow::Result<()> {
+fn read_all_input(all_lines: &mut impl LineStore, file_list: &[String]) -> anyhow::Result<()> {
     if file_list.is_empty() {
-        read_stdin_into_vec(all_lines).context("Error reading STDIN")?;
+        read_stdin_into_vec(all_lines).context("Reading STDIN")?;
     } else {
         for file_path in file_list {
             read_file_lines_into_vec(all_lines, file_path)
-                .context(format!("Error reading file '{file_path}'"))?;
+                .context(format!("Reading file '{file_path}'"))?;
         }
     }
-
     Ok(())
 }
 
-fn read_stdin_into_vec(lines_vec: &mut Vec<String>) -> io::Result<()> {
+fn read_stdin_into_vec(store: &mut impl LineStore) -> io::Result<()> {
     for line in io::stdin().lines() {
-        lines_vec.push(line?);
+        store.add_line(line?);
     }
     Ok(())
 }
 
-fn read_file_lines_into_vec<P>(lines_vec: &mut Vec<String>, file_path: P) -> io::Result<()>
+fn read_file_lines_into_vec<P>(store: &mut impl LineStore, file_path: P) -> io::Result<()>
 where
     P: AsRef<Path>,
 {
     let fh = File::open(file_path)?;
     for line in io::BufReader::new(fh).lines() {
-        lines_vec.push(line?);
+        store.add_line(line?);
     }
     Ok(())
 }

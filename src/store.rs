@@ -5,22 +5,21 @@ pub trait LineStore {
     fn get_all_lines(self) -> Vec<String>;
 }
 
-pub struct Simple {
-    lines: Vec<String>,
-}
+pub struct Simple(Vec<String>);
+
 impl Simple {
     pub fn new() -> Self {
-        Self { lines: vec![] }
+        Self(vec![])
     }
 }
 
 impl LineStore for Simple {
     fn add_line(&mut self, line: String) {
-        self.lines.push(line);
+        self.0.push(line);
     }
 
     fn get_all_lines(self) -> Vec<String> {
-        self.lines
+        self.0
     }
 }
 
@@ -31,10 +30,10 @@ pub struct Reservoir {
     rng: ThreadRng,
 }
 impl Reservoir {
-    pub fn new(size: usize) -> Self {
+    pub fn new(resr_size: usize) -> Self {
         Self {
             lines: vec![],
-            resr_size: size,
+            resr_size,
             count: 0,
             rng: rand::rng(),
         }

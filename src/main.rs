@@ -4,9 +4,7 @@ mod store;
 use crate::store::LineStore;
 use anyhow::{self, Context};
 use clap::Parser;
-use std::fs::File;
-use std::io::{self, BufRead, Write};
-use std::path::Path;
+use std::io::{self, Write};
 
 /// Sort input lines, sorting digit sub-strings numerically
 ///
@@ -48,12 +46,12 @@ fn main() -> anyhow::Result<()> {
     let mut all_lines: Vec<String> = if cli.sample > 0 {
         // Read a random sample of lines from the files or STDIN
         let mut store = store::Reservoir::new(cli.sample);
-        store_all_input(&mut store, &cli.file)?;
+        store.store_all_input(&cli.file)?;
         store.get_all_lines()
     } else {
         // Read the lines of all the files or STDIN
         let mut store = store::Simple::new();
-        store_all_input(&mut store, &cli.file)?;
+        store.store_all_input(&cli.file)?;
         store.get_all_lines()
     };
 
@@ -65,36 +63,6 @@ fn main() -> anyhow::Result<()> {
         write_vec_to_stdout(&all_lines).context("Writing to STDOUT")?;
     }
 
-    Ok(())
-}
-
-fn store_all_input(store: &mut impl LineStore, file_list: &[String]) -> anyhow::Result<()> {
-    if file_list.is_empty() {
-        store_stdin_lines(store).context("Reading STDIN")?;
-    } else {
-        for file_path in file_list {
-            store_file_lines(store, file_path)
-                .context(format!("Reading file '{file_path}'"))?;
-        }
-    }
-    Ok(())
-}
-
-fn store_stdin_lines(store: &mut impl LineStore) -> io::Result<()> {
-    for line in io::stdin().lines() {
-        store.add_line(line?);
-    }
-    Ok(())
-}
-
-fn store_file_lines<P>(store: &mut impl LineStore, file_path: P) -> io::Result<()>
-where
-    P: AsRef<Path>,
-{
-    let fh = File::open(file_path)?;
-    for line in io::BufReader::new(fh).lines() {
-        store.add_line(line?);
-    }
     Ok(())
 }
 

@@ -60,9 +60,9 @@ fn main() -> anyhow::Result<()> {
     // Sort lines and print them all to STDOUT
     all_lines.sort_unstable_by(|a, b| ace_sort::ace_cmp(a, b));
     if cli.unique {
-        write_vec_unique_to_stdout(&all_lines).context("Witing to STDOUT")?;
+        write_vec_unique_to_stdout(&all_lines).context("Writing to STDOUT")?;
     } else {
-        write_vec_to_stdout(&all_lines).context("Witing to STDOUT")?;
+        write_vec_to_stdout(&all_lines).context("Writing to STDOUT")?;
     }
 
     Ok(())

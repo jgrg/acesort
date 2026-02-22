@@ -48,12 +48,12 @@ fn main() -> anyhow::Result<()> {
     let mut all_lines: Vec<String> = if cli.sample > 0 {
         // Read a random sample of lines from the files or STDIN
         let mut store = store::Reservoir::new(cli.sample);
-        read_all_input(&mut store, &cli.file)?;
+        store_all_input(&mut store, &cli.file)?;
         store.get_all_lines()
     } else {
         // Read the lines of all the files or STDIN
         let mut store = store::Simple::new();
-        read_all_input(&mut store, &cli.file)?;
+        store_all_input(&mut store, &cli.file)?;
         store.get_all_lines()
     };
 
@@ -68,26 +68,26 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn read_all_input(all_lines: &mut impl LineStore, file_list: &[String]) -> anyhow::Result<()> {
+fn store_all_input(store: &mut impl LineStore, file_list: &[String]) -> anyhow::Result<()> {
     if file_list.is_empty() {
-        read_stdin_into_vec(all_lines).context("Reading STDIN")?;
+        store_stdin_lines(store).context("Reading STDIN")?;
     } else {
         for file_path in file_list {
-            read_file_lines_into_vec(all_lines, file_path)
+            store_file_lines(store, file_path)
                 .context(format!("Reading file '{file_path}'"))?;
         }
     }
     Ok(())
 }
 
-fn read_stdin_into_vec(store: &mut impl LineStore) -> io::Result<()> {
+fn store_stdin_lines(store: &mut impl LineStore) -> io::Result<()> {
     for line in io::stdin().lines() {
         store.add_line(line?);
     }
     Ok(())
 }
 
-fn read_file_lines_into_vec<P>(store: &mut impl LineStore, file_path: P) -> io::Result<()>
+fn store_file_lines<P>(store: &mut impl LineStore, file_path: P) -> io::Result<()>
 where
     P: AsRef<Path>,
 {

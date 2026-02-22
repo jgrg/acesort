@@ -1,7 +1,9 @@
 use std::cmp::Ordering;
 
-// Adapted from `version_cmp()` in:
-//   https://github.com/uutils/coreutils/blob/main/src/uucore/src/lib/features/version_cmp.rs
+/// Sort comparisson which treats sub-strings of digits numerically.
+///
+/// Adapted from:
+/// [`version_cmp()`](https://github.com/uutils/coreutils/blob/main/src/uucore/src/lib/features/version_cmp.rs)
 pub fn ace_cmp(mut a: &str, mut b: &str) -> Ordering {
     if a == b {
         return Ordering::Equal;

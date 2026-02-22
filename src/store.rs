@@ -8,6 +8,7 @@ pub trait LineStore {
     fn add_line(&mut self, line: String);
     fn get_all_lines(self) -> Vec<String>;
 
+    /// Stores lines from `STDIN`
     fn store_stdin_lines(&mut self) -> io::Result<()> {
         for line in io::stdin().lines() {
             self.add_line(line?);
@@ -15,6 +16,7 @@ pub trait LineStore {
         Ok(())
     }
 
+    /// Stores lines from the file at `file_path`
     fn store_file_lines<P>(&mut self, file_path: P) -> io::Result<()>
     where
         P: AsRef<Path>,
@@ -26,6 +28,7 @@ pub trait LineStore {
         Ok(())
     }
 
+    /// Stores lines from all the files in `file_list` or from `STDIN`
     fn store_all_input(&mut self, file_list: &[String]) -> anyhow::Result<()> {
         if file_list.is_empty() {
             self.store_stdin_lines().context("Reading STDIN")?;
@@ -39,6 +42,7 @@ pub trait LineStore {
     }
 }
 
+/// A tuple struct for the simple case of taking all the input lines
 pub struct Simple(Vec<String>);
 
 impl Simple {
@@ -57,6 +61,7 @@ impl LineStore for Simple {
     }
 }
 
+/// Contains internal state required for reservoir sampling of the input lines
 pub struct Reservoir {
     lines: Vec<String>,
     resr_size: usize,

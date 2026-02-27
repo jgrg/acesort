@@ -1,7 +1,7 @@
 mod ace_sort;
 mod store;
 
-use crate::store::LineStore;
+use crate::store::{LineStore, Reservoir};
 use anyhow::{self, Context};
 use clap::Parser;
 use std::io::{self, Write};
@@ -45,9 +45,9 @@ fn main() -> anyhow::Result<()> {
 
     let mut all_lines: Vec<String> = if cli.sample > 0 {
         // Read a random sample of lines from the files or STDIN
-        let mut store = store::Reservoir::new(cli.sample);
-        store.store_all_input(&cli.file)?;
-        store.get_all_lines()
+        let mut resr = Reservoir::new(cli.sample);
+        resr.store_all_input(&cli.file)?;
+        resr.get_all_lines()
     } else {
         // Read the lines of all the files or STDIN
         let mut store = vec![];

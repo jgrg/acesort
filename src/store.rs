@@ -47,7 +47,6 @@ impl LineStore for Vec<String> {
     }
 }
 
-
 /// Contains internal state required for reservoir sampling of the input lines
 pub struct Reservoir {
     lines: Vec<String>,

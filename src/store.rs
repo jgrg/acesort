@@ -6,7 +6,6 @@ use std::path::Path;
 
 pub trait LineStore {
     fn add_line(&mut self, line: String);
-    fn get_all_lines(self) -> Vec<String>;
 
     /// Stores lines from `STDIN`
     fn store_stdin_lines(&mut self) -> io::Result<()> {
@@ -42,24 +41,12 @@ pub trait LineStore {
     }
 }
 
-/// A tuple struct for the simple case of taking all the input lines
-pub struct Simple(Vec<String>);
-
-impl Simple {
-    pub fn new() -> Self {
-        Self(vec![])
-    }
-}
-
-impl LineStore for Simple {
+impl LineStore for Vec<String> {
     fn add_line(&mut self, line: String) {
-        self.0.push(line);
-    }
-
-    fn get_all_lines(self) -> Vec<String> {
-        self.0
+        self.push(line);
     }
 }
+
 
 /// Contains internal state required for reservoir sampling of the input lines
 pub struct Reservoir {
@@ -77,6 +64,10 @@ impl Reservoir {
             rng: rand::rng(),
         }
     }
+
+    pub fn get_all_lines(self) -> Vec<String> {
+        self.lines
+    }
 }
 
 impl LineStore for Reservoir {
@@ -90,9 +81,5 @@ impl LineStore for Reservoir {
                 self.lines[i] = line;
             }
         }
-    }
-
-    fn get_all_lines(self) -> Vec<String> {
-        self.lines
     }
 }

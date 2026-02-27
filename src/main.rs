@@ -6,10 +6,10 @@ use anyhow::{self, Context};
 use clap::Parser;
 use std::io::{self, Write};
 
-/// Sort input lines, sorting digit sub-strings numerically
+/// Sort input lines, sorting digit sub-strings numerically.
 ///
-/// This is also known as "natural" sorting. Version sorting (the `-V` option
-/// in the UNIX sort command) is similar. `acesort` is named after ACeDB's
+/// This is also known as "natural" sorting.  Version sorting (the `-V` option
+/// in the UNIX sort command) is similar.  `acesort` is named after ACeDB's
 /// default method of sorting where, for example, "chr2" sorts
 /// before "chr10".
 #[derive(Parser)]
@@ -50,9 +50,9 @@ fn main() -> anyhow::Result<()> {
         store.get_all_lines()
     } else {
         // Read the lines of all the files or STDIN
-        let mut store = store::Simple::new();
+        let mut store = vec![];
         store.store_all_input(&cli.file)?;
-        store.get_all_lines()
+        store
     };
 
     // Sort lines and print them all to STDOUT

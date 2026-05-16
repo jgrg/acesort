@@ -18,6 +18,10 @@ struct Cli {
     /// List of one or more files to sort, or STDIN if empty.
     file: Vec<String>,
 
+    /// Reverse the sort order.
+    #[arg(short, long)]
+    reverse: bool,
+
     /// Unique lines only.
     ///
     /// Removes duplicate lines from the sorted output.
@@ -57,6 +61,11 @@ fn main() -> anyhow::Result<()> {
 
     // Sort lines and print them all to STDOUT
     all_lines.sort_unstable_by(|a, b| ace_sort::ace_cmp(a, b));
+
+    if cli.reverse {
+        all_lines.reverse();
+    }
+
     if cli.unique {
         write_vec_unique_to_stdout(&all_lines).context("Writing to STDOUT")?;
     } else {

@@ -23,6 +23,7 @@ complexity = "warn"
 perf = "warn"
 style = "warn"
 pedantic = "warn"
+doc-valid-idents = ["ACeDB", ".."]
 
 [dependencies]
 anyhow = "1.0.101"
